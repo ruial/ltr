@@ -19,21 +19,21 @@ object Linear extends App {
 
   println("Reading test dataset")
   val test = Paths.get(System.getProperty("user.home"), "Downloads/MSLR-WEB10K/Fold1/test.txt")
-  val limit = 3
+  val limit = 10
   val start1 = System.nanoTime
   val matrix = MLUtils.svmread(test.toString, scale)
   val end1 = System.nanoTime
-  println("Elapsed ms reading: "+ (end1-start1) / 1e6)
+  println("Elapsed ms reading: " + (end1 - start1) / 1e6)
 
   val start2 = System.nanoTime
   val reg_result = matrix * regCoef + regIntercept
   val end2 = System.nanoTime
-  println("Linear regression", reg_result(0 until limit ))
-  println("Elapsed ms linear regression: "+ (end2-start2) / 1e6)
+  println("Linear regression", reg_result(0 until limit))
+  println("Elapsed ms linear regression: " + (end2 - start2) / 1e6)
 
   val start3 = System.nanoTime
   val log_result = sigmoid(matrix * clfCoef + clfIntercept)
   val end3 = System.nanoTime
   println("Logistic regression", log_result(0 until limit))
-  println("Elapsed ms logistic regression: "+ (end3-start3) / 1e6)
+  println("Elapsed ms logistic regression: " + (end3 - start3) / 1e6)
 }

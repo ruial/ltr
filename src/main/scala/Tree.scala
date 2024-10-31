@@ -16,7 +16,7 @@ object Tree extends App {
   val end1 = System.nanoTime
   println("Elapsed ms XGBoost: " + (end1-start1) / 1e6)
 
-  val limit = 3
+  val limit = 10
   predictions.slice(0, limit).foreach(p => println(p.mkString("Array(", ", ", ")")))
 
   // example predicting single vectors, slower than batch
@@ -27,7 +27,7 @@ object Tree extends App {
   }
 
   val matrix = MLUtils.svmread(test.toString, null, limit)
-  println(matrix.toDense)
+  // println(matrix.toDense)
 
   val individualPredictions = (0 until matrix.rows).map{ rowIndex =>
     val row = matrix(rowIndex, 0 until matrix.cols)

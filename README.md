@@ -9,5 +9,5 @@ Check my [article](https://briefbytes.com/2022/Learning-to-rank-and-ML-pipelines
 To run the Python notebook you need numpy, pandas, sklearn and xgboost (use the same version as the Scala app).
 
 ```
-sbt -mem 4000 run
+sbt -no-colors -mem 4000 run
 ```

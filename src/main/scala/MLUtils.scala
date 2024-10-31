@@ -1,6 +1,6 @@
 package com.briefbytes.ltr
 
-import breeze.linalg.{CSCMatrix, DenseVector, SparseVector}
+import breeze.linalg.{CSCMatrix, DenseVector}
 
 import scala.io.Source
 
@@ -16,9 +16,11 @@ object MLUtils {
         val processedLine = if (commentPos == -1) line else line.substring(0, commentPos)
         val dropColumns = if (line.contains("qid:")) 2 else 1
         val parts = processedLine.split(" ").drop(dropColumns)
-        val tuples = parts.map(x => {
-          val part = x.split(":")
-          (part(0).toInt - 1, part(1).toDouble)
+        val tuples = parts.flatMap(x => {
+          val sepIndex = x.indexOf(":")
+          val colIndex = x.substring(0, sepIndex).toInt - 1
+          val value = x.substring(sepIndex + 1).toDouble
+          if (value != 0.0) Some(colIndex, value) else None
         })
         val lastIndex = tuples.last._1
         if (lastIndex > max) {
@@ -28,35 +30,14 @@ object MLUtils {
       }).toIndexedSeq
     source.close()
 
-    val vectors = lines.map(line => {
-      val arr = DenseVector.fill(max + 1) {
-        0.0
+    val builder = new CSCMatrix.Builder[Double](rows = lines.length, cols = max + 1)
+    lines.zipWithIndex.foreach { case (line, rowIndex) =>
+      line.foreach { case (colIndex, value) =>
+        val scaledValue = if (scale != null) value / scale(colIndex) else value
+        builder.add(rowIndex, colIndex, scaledValue)
       }
-      line.foreach(tuple => {
-        val idx = tuple._1
-        arr(idx) = tuple._2
-      })
-      if (scale == null) {
-        SparseVector(arr.toArray)
-      } else {
-        SparseVector((arr / scale).toArray)
-      }
-    })
-
-    // based on breeze.linalg.csvread, this is slow, takes 30s out of the method's 37s
-    if (vectors.isEmpty) {
-      CSCMatrix.zeros[Double](0, 0)
-    } else {
-      CSCMatrix.tabulate(vectors.length, max + 1)((i, j) => {
-        val s = vectors(i)
-        if (j > s.length - 1) {
-          0
-        } else {
-          s.valueAt(j)
-        }
-      })
     }
-
+    builder.result()
   }
 
 }
